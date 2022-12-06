@@ -9,14 +9,28 @@ string textPath = Path.Combine(assemblyDirectory, "input.debug.txt");
 string textPath = Path.Combine(assemblyDirectory, "input.txt");
 #endif
 
-string[] input = File.ReadAllLines(textPath);
+string input = File.ReadAllText(textPath);
+char[] chars = input.ToCharArray();
 
 // Part 1
 
-int counter = 0;
-
-foreach (string line in input)
+for (int counter = 4; counter <= chars.Length; counter++ )
 {
+    var slice = chars[(counter - 4)..(counter)];
+    if (slice.Distinct().Count() == 4)
+    {
+        Console.WriteLine($"Teil 1: {counter}");
+        break;
+    }
 }
 
-Console.WriteLine($"Teil 1: {counter}");
+// Part 2
+for (int counter = 14; counter <= chars.Length; counter++)
+{
+    var slice = chars[(counter - 14)..(counter)];
+    if (slice.Distinct().Count() == 14)
+    {
+        Console.WriteLine($"Teil 2: {counter}");
+        break;
+    }
+}
