@@ -12,6 +12,11 @@ string textPath = Path.Combine(assemblyDirectory, "input.txt");
 
 string[] input = File.ReadAllLines(textPath);
 
+// Preparation for speed
+var process = Process.GetCurrentProcess();
+process.PriorityClass = ProcessPriorityClass.High;
+process.PriorityBoostEnabled = true;
+
 // parse input
 
 Stopwatch stopwatch = Stopwatch.StartNew();
@@ -19,14 +24,14 @@ Stopwatch stopwatch = Stopwatch.StartNew();
 int xMax = input[0].Length;
 int yMax = input.Length;
 
-byte[,] treeMap = new byte[xMax, yMax];
+sbyte[,] treeMap = new sbyte[xMax, yMax];
 
 // construct map from input
 for (int x = 0; x < xMax; x++)
 {
     for (int y = 0; y < yMax; y++)
     {
-        treeMap[x, y] = byte.Parse(input[y][x].ToString());
+        treeMap[x, y] = sbyte.Parse(input[y][x].ToString());
     }
 }
 
@@ -38,30 +43,25 @@ Console.WriteLine($"Input preparation took {stopwatch.Elapsed.TotalMilliseconds:
 stopwatch.Restart();
 
 // saving visible trees in a set of ValueTuples of coordinates
-HashSet<(int, int)> visibleTrees = new HashSet<(int, int)> ();
+bool[,] visibilityMap = new bool[xMax, yMax];
 
 // for every line
 for (int y = 0; y < yMax; y++)
 {
-    short lastVal = -1;
-    // from left to right
+    sbyte lastValL = -1;
+    sbyte lastValR = -1;
+
     for (int x = 0; x < xMax; x++)
     {
-        if (treeMap[x, y] > lastVal) 
+        if (treeMap[x, y] > lastValL) 
         { 
-            lastVal = treeMap[x, y];
-            visibleTrees.Add((x, y));
+            lastValL = treeMap[x, y];
+            visibilityMap[x, y] = true;
         }
-    }
-
-    lastVal = -1;
-    // from right to left
-    for (int x = xMax - 1; x >= 0; x--)
-    {
-        if (treeMap[x, y] > lastVal)
+        if (treeMap[xMax - x - 1, y] > lastValR)
         {
-            lastVal = treeMap[x, y];
-            visibleTrees.Add((x, y));
+            lastValR = treeMap[xMax - x - 1, y];
+            visibilityMap[xMax - x - 1, y] = true;
         }
     }
 }
@@ -69,32 +69,28 @@ for (int y = 0; y < yMax; y++)
 // for every column
 for (int x = 0; x < xMax; x++)
 {
-    short lastVal = -1;
-    // from top to bottom
+    sbyte lastValT = -1;
+    sbyte lastValB = -1;
+
     for (int y = 0; y < yMax; y++)
     {
-        if (treeMap[x, y] > lastVal)
+        if (treeMap[x, y] > lastValT)
         {
-            lastVal = treeMap[x, y];
-            visibleTrees.Add((x, y));
+            lastValT = treeMap[x, y];
+            visibilityMap[x, y] = true;
+        }
+        if (treeMap[x, yMax - y -1] > lastValB)
+        {
+            lastValB = treeMap[x, yMax - y - 1];
+            visibilityMap[x, yMax - y - 1] = true;
         }
     }
 
-    lastVal = -1;
-    // from bottom to top
-    for (int y = yMax - 1; y >= 0; y--)
-    {
-        if (treeMap[x, y] > lastVal)
-        {
-            lastVal = treeMap[x, y];
-            visibleTrees.Add((x, y));
-        }
-    }
 }
 
 stopwatch.Stop();
 Console.WriteLine($"Part 1 took {stopwatch.Elapsed.TotalMilliseconds:F4} ms and {stopwatch.ElapsedTicks} ticks");
-Console.WriteLine($"Part 1: {visibleTrees.Count}");
+Console.WriteLine($"Part 1: {visibilityMap.Cast<bool>().Where(v => v).Count()}");
 
 // part 2
 
@@ -108,7 +104,7 @@ for (int x = 1; x < xMax-1; x++)
 {
     for (int y = 1; y < yMax-1; y++)
     {
-        byte currVal = treeMap[x, y];
+        sbyte currVal = treeMap[x, y];
 
         int scoreLeft = 0;
         int xOffset = -1;
