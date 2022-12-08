@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.Metrics;
+﻿using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Reflection;
 
 string assemblyPath = Assembly.GetExecutingAssembly().Location;
@@ -12,6 +13,8 @@ string textPath = Path.Combine(assemblyDirectory, "input.txt");
 string[] input = File.ReadAllLines(textPath);
 
 // parse input
+
+Stopwatch stopwatch = Stopwatch.StartNew();
 
 int xMax = input[0].Length;
 int yMax = input.Length;
@@ -27,7 +30,12 @@ for (int x = 0; x < xMax; x++)
     }
 }
 
+stopwatch.Stop();
+Console.WriteLine($"Input preparation took {stopwatch.Elapsed.TotalMilliseconds:F4} ms and {stopwatch.ElapsedTicks} ticks");
+
 // part 1
+
+stopwatch.Restart();
 
 // saving visible trees in a set of ValueTuples of coordinates
 HashSet<(int, int)> visibleTrees = new HashSet<(int, int)> ();
@@ -84,9 +92,13 @@ for (int x = 0; x < xMax; x++)
     }
 }
 
-Console.WriteLine($"Teil 1: {visibleTrees.Count}");
+stopwatch.Stop();
+Console.WriteLine($"Part 1 took {stopwatch.Elapsed.TotalMilliseconds:F4} ms and {stopwatch.ElapsedTicks} ticks");
+Console.WriteLine($"Part 1: {visibleTrees.Count}");
 
 // part 2
+
+stopwatch.Restart();
 
 // creating a score map for holding scores
 int[,] scoreMap = new int[xMax, yMax];
@@ -142,5 +154,6 @@ for (int x = 1; x < xMax-1; x++)
         scoreMap[x, y] = scoreLeft * scoreRight * scoreUp * scoreDown;
     }
 }
-
-Console.WriteLine($"Teil 2: {scoreMap.Cast<int>().Max()}");
+stopwatch.Stop();
+Console.WriteLine($"Part 2 took {stopwatch.Elapsed.TotalMilliseconds:F4} ms and {stopwatch.ElapsedTicks} ticks");
+Console.WriteLine($"Part 2: {scoreMap.Cast<int>().Max()}");
