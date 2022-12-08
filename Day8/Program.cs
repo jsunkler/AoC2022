@@ -11,13 +11,14 @@ string textPath = Path.Combine(assemblyDirectory, "input.txt");
 
 string[] input = File.ReadAllLines(textPath);
 
-// Parse input
+// parse input
 
 int xMax = input[0].Length;
 int yMax = input.Length;
 
 byte[,] treeMap = new byte[xMax, yMax];
 
+// construct map from input
 for (int x = 0; x < xMax; x++)
 {
     for (int y = 0; y < yMax; y++)
@@ -26,11 +27,12 @@ for (int x = 0; x < xMax; x++)
     }
 }
 
-// Part 1
+// part 1
 
+// saving visible trees in a set of ValueTuples of coordinates
 HashSet<(int, int)> visibleTrees = new HashSet<(int, int)> ();
 
-// For every line
+// for every line
 for (int y = 0; y < yMax; y++)
 {
     short lastVal = -1;
@@ -56,10 +58,11 @@ for (int y = 0; y < yMax; y++)
     }
 }
 
+// for every column
 for (int x = 0; x < xMax; x++)
 {
     short lastVal = -1;
-    // from left to right
+    // from top to bottom
     for (int y = 0; y < yMax; y++)
     {
         if (treeMap[x, y] > lastVal)
@@ -70,7 +73,7 @@ for (int x = 0; x < xMax; x++)
     }
 
     lastVal = -1;
-    // from right to left
+    // from bottom to top
     for (int y = yMax - 1; y >= 0; y--)
     {
         if (treeMap[x, y] > lastVal)
@@ -83,10 +86,12 @@ for (int x = 0; x < xMax; x++)
 
 Console.WriteLine($"Teil 1: {visibleTrees.Count}");
 
-// Part 2
+// part 2
 
+// creating a score map for holding scores
 int[,] scoreMap = new int[xMax, yMax];
 
+// trees on edges will always have a score of 0
 for (int x = 1; x < xMax-1; x++)
 {
     for (int y = 1; y < yMax-1; y++)
@@ -95,6 +100,7 @@ for (int x = 1; x < xMax-1; x++)
 
         int scoreLeft = 0;
         int xOffset = -1;
+        // iterating to the left
         while (x+xOffset >= 0)
         {
             scoreLeft++;
@@ -104,6 +110,7 @@ for (int x = 1; x < xMax-1; x++)
 
         int scoreRight = 0;
         xOffset = 1;
+        // iterating to the right
         while (x + xOffset < xMax)
         {
             scoreRight++;
@@ -113,6 +120,7 @@ for (int x = 1; x < xMax-1; x++)
 
         int scoreUp = 0;
         int yOffset = -1;
+        // iterating to the top
         while (y + yOffset >= 0)
         {
             scoreUp++;
@@ -122,6 +130,7 @@ for (int x = 1; x < xMax-1; x++)
 
         int scoreDown = 0;
         yOffset = 1;
+        // iterating to the bottom
         while (y + yOffset < yMax)
         {
             scoreDown++;
@@ -129,6 +138,7 @@ for (int x = 1; x < xMax-1; x++)
             yOffset++;
         }
 
+        // saving score
         scoreMap[x, y] = scoreLeft * scoreRight * scoreUp * scoreDown;
     }
 }
