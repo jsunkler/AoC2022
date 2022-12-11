@@ -15,6 +15,8 @@ namespace Day11
             initializeGame();
         }
 
+        private long modulus = 1;
+
         public void initializeGame()
         {
 #if DEBUG
@@ -45,6 +47,8 @@ namespace Day11
                         (m, i) => m[1].ReceiveItem(i)
                     )
             };
+            modulus = 1 * 23 * 19 * 13 * 17;
+            
             Monkeys[0].ReceiveItem(79);
             Monkeys[0].ReceiveItem(98);
             Monkeys[1].ReceiveItem(54);
@@ -107,6 +111,8 @@ namespace Day11
                         (m, i) => m[6].ReceiveItem(i)
                     )
             };
+            modulus = 1 * 7 * 3 * 2 * 11 * 17 * 5 * 13 * 19;
+
             Monkeys[0].ReceiveItem(91);
             Monkeys[0].ReceiveItem(58);
             Monkeys[0].ReceiveItem(52);
@@ -158,7 +164,7 @@ namespace Day11
         {
             for (int i = 0; i < Monkeys.Length; i++)
             {
-                Monkeys[i].DoTurn(Monkeys, isPartTwo);
+                Monkeys[i].DoTurn(Monkeys, isPartTwo, modulus);
             }
         }
 
