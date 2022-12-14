@@ -25,6 +25,8 @@ internal class Program
 
         Console.WriteLine($"Teil 1: {counter}");
 
+        Console.ReadLine();
+
         // Part 2
         caveMap = getCave(input);
         printCave(caveMap);
@@ -130,8 +132,13 @@ internal class Program
         {
             for (int x = minX; x <= maxX; x++)
             {
-                char o = map.GetValueOrDefault((x, y), '.');
-                Console.Write(o);
+                char o = map.GetValueOrDefault((x, y), ' ');
+                Console.ResetColor();
+                if (o == ' ') Console.BackgroundColor = ConsoleColor.Gray;
+                if (o == '#') Console.BackgroundColor = ConsoleColor.DarkGray;
+                if (o == 'o') Console.BackgroundColor = ConsoleColor.DarkYellow;
+                //Console.Write(o);
+                Console.Write(' ');
             }
             Console.WriteLine();
         }
