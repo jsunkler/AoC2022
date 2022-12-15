@@ -6,46 +6,24 @@ using System.Threading.Tasks;
 
 namespace Day15
 {
-    internal class Sensor
+    record struct Sensor
     {
-        public (int x, int y) SensorPosition { get; set; }
+        public (int x, int y) SensorPosition { get; private set; }
 
-        public (int x, int y) BeaconPosition { get; set; }
+        public (int x, int y) BeaconPosition { get; private set; }
 
-        public int CoveredDistance
-        {
-            get
-            {
-                return Math.Abs(SensorPosition.x - BeaconPosition.x) + Math.Abs(SensorPosition.y - BeaconPosition.y);
-            }
-        }
+        public int CoveredDistance { get; private set; }
 
         public bool CoversPoint((int x, int y) point)
         {
+            if (point == SensorPosition || point == BeaconPosition) return true;
             int d = Math.Abs(SensorPosition.x - point.x) + Math.Abs(SensorPosition.y - point.y);
             return d <= CoveredDistance;
         }
 
-        public HashSet<(int x, int y)> CoveredPoints
+        public Rectangle ToRectangle()
         {
-            get
-            {
-                HashSet<(int x, int y)> temp = new()
-                {
-                    (SensorPosition.x, SensorPosition.y),
-                    (BeaconPosition.x, BeaconPosition.y)
-                };
-
-                for (int x = SensorPosition.x - CoveredDistance; x <= SensorPosition.x + CoveredDistance; x++)
-                {
-                    for (int y = SensorPosition.y - CoveredDistance; y <= SensorPosition.y + CoveredDistance; y++)
-                    {
-                        if (CoversPoint((x, y))) temp.Add((x, y));
-                    }
-                }
-
-                return temp;
-            }
+            return new Rectangle(SensorPosition.x - CoveredDistance, SensorPosition.y - CoveredDistance, 2 * CoveredDistance + 1, 2 * CoveredDistance + 1);
         }
 
         public Sensor(
@@ -55,6 +33,7 @@ namespace Day15
         {
             SensorPosition = sensor;
             BeaconPosition = beacon;
+            CoveredDistance = Math.Abs(SensorPosition.x - BeaconPosition.x) + Math.Abs(SensorPosition.y - BeaconPosition.y);
         }
 
     }
