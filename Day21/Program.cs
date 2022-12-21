@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.Metrics;
+﻿using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Reflection;
 using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
@@ -57,5 +58,9 @@ foreach (string line in input)
 }
 
 // Part 1
-
-Console.WriteLine($"Part 1: {monkeys["root"].Invoke()}");
+Stopwatch sw = new Stopwatch();
+sw.Reset();
+sw.Start();
+long result = monkeys["root"].Invoke();
+sw.Stop();
+Console.WriteLine($"Part 1: {result} in {sw.Elapsed.TotalMilliseconds} ms");
