@@ -1,8 +1,11 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics.Metrics;
 using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
+
+// Preparation for speed
+var process = Process.GetCurrentProcess();
+process.PriorityClass = ProcessPriorityClass.High;
+process.PriorityBoostEnabled = true;
 
 string assemblyPath = Assembly.GetExecutingAssembly().Location;
 string assemblyDirectory = Path.GetDirectoryName(assemblyPath);
@@ -26,32 +29,33 @@ foreach (string line in input)
 
     Func<long> retFunc = null;
     string monkeyId = match1.Groups[1].Value;
-    if (match2.Success)
-    {
-        string monkeyLeftId = match2.Groups[1].Value;
-        string monkeyRightId = match2.Groups[3].Value;
-        string op = match2.Groups[2].Value;
-
-        switch (op)
-        {
-            case "+":
-                retFunc = () => { return monkeys[monkeyLeftId].Invoke() + monkeys[monkeyRightId].Invoke(); };
-                break;
-            case "-":
-                retFunc = () => { return monkeys[monkeyLeftId].Invoke() - monkeys[monkeyRightId].Invoke(); };
-                break;
-            case "*":
-                retFunc = () => { return monkeys[monkeyLeftId].Invoke() * monkeys[monkeyRightId].Invoke(); };
-                break;
-            case "/":
-                retFunc = () => { return monkeys[monkeyLeftId].Invoke() / monkeys[monkeyRightId].Invoke(); };
-                break;
-        }
-    }
-    else
+    if (!match2.Success)
     {
         long ret = long.Parse(match1.Groups[2].Value);
         retFunc = () => { return ret; };
+
+        monkeys[monkeyId] = retFunc;
+        continue;
+    }
+
+    string monkeyLeftId = match2.Groups[1].Value;
+    string monkeyRightId = match2.Groups[3].Value;
+    string op = match2.Groups[2].Value;
+
+    switch (op)
+    {
+        case "+":
+            retFunc = () => { return monkeys[monkeyLeftId].Invoke() + monkeys[monkeyRightId].Invoke(); };
+            break;
+        case "-":
+            retFunc = () => { return monkeys[monkeyLeftId].Invoke() - monkeys[monkeyRightId].Invoke(); };
+            break;
+        case "*":
+            retFunc = () => { return monkeys[monkeyLeftId].Invoke() * monkeys[monkeyRightId].Invoke(); };
+            break;
+        case "/":
+            retFunc = () => { return monkeys[monkeyLeftId].Invoke() / monkeys[monkeyRightId].Invoke(); };
+            break;
     }
 
     monkeys[monkeyId] = retFunc;
@@ -63,4 +67,4 @@ sw.Reset();
 sw.Start();
 long result = monkeys["root"].Invoke();
 sw.Stop();
-Console.WriteLine($"Part 1: {result} in {sw.Elapsed.TotalMilliseconds} ms");
+Console.WriteLine($"Part 1: {result} in {sw.Elapsed.TotalNanoseconds} ns");
