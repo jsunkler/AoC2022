@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
 
 // Preparation for speed
@@ -21,6 +22,7 @@ Regex regex1 = new Regex(@"^([a-z]{4}): (.*)$", RegexOptions.Compiled);
 Regex regex2 = new Regex(@"([a-z]{4}) ([-*/+]) ([a-z]{4})", RegexOptions.Compiled);
 
 Dictionary<string, Func<long>> monkeys = new();
+Dictionary<string, string> monkeyFunction = new();
 
 foreach (string line in input)
 {
@@ -35,12 +37,19 @@ foreach (string line in input)
         retFunc = () => { return ret; };
 
         monkeys[monkeyId] = retFunc;
+        monkeyFunction[monkeyId] = ret.ToString();
         continue;
     }
 
     string monkeyLeftId = match2.Groups[1].Value;
     string monkeyRightId = match2.Groups[3].Value;
     string op = match2.Groups[2].Value;
+
+    if (monkeyId == "root")
+    {
+        monkeys["root2"] = () => { return Math.Abs(monkeys[monkeyLeftId].Invoke() - monkeys[monkeyRightId].Invoke()); };
+        monkeyFunction["root2"] = $"{monkeyLeftId} == {monkeyRightId}";
+    }
 
     switch (op)
     {
@@ -59,6 +68,7 @@ foreach (string line in input)
     }
 
     monkeys[monkeyId] = retFunc;
+    monkeyFunction[monkeyId] = $"({monkeyLeftId} {op} {monkeyRightId})";
 }
 
 // Part 1
@@ -68,3 +78,33 @@ sw.Start();
 long result = monkeys["root"].Invoke();
 sw.Stop();
 Console.WriteLine($"Part 1: {result} in {sw.Elapsed.TotalNanoseconds} ns");
+
+
+// Part 2
+Regex regex3 = new Regex(@"[a-z]{4}", RegexOptions.Compiled);
+
+monkeyFunction["humn"] = "x";
+
+while (regex3.IsMatch(monkeyFunction["root2"]))
+{
+    var m = regex3.Matches(monkeyFunction["root2"]);
+    
+    foreach (var mat in m.AsEnumerable())
+    {
+        monkeyFunction["root2"] = monkeyFunction["root2"].Replace(mat.Value, monkeyFunction[mat.Value]);
+    }
+}
+
+Console.WriteLine(monkeyFunction["root2"]);
+
+// Solve with sympy
+/*
+ * from sympy import Eq, solve
+ * from sympy.abc import x
+ * 
+ * data = open("input.txt").read()
+ * lhs, rhs = data.split("==")
+ * 
+ * result = solve(Eq(eval(lhs), eval(rhs)), dict=True)
+ * print(result[0][x])
+*/
